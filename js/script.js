@@ -11,7 +11,8 @@ const PROMPTS=[
 
 function shuffle(a){const b=[...a];for(let i=b.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[b[i],b[j]]=[b[j],b[i]];}return b;}
 
-let STATE={players:[],captainIdx:0,assignments:{},sortOrder:[],captainOrder:[],usedPrompts:[],promptIdx:0,secretIdx:0,seenCount:0,revealed:false};
+// Agregado STATE.round para trackear rondas jugadas
+let STATE={players:[],captainIdx:0,assignments:{},sortOrder:[],captainOrder:[],usedPrompts:[],promptIdx:0,secretIdx:0,seenCount:0,revealed:false, round:1};
 
 /* ---- TEMA CLARO/OSCURO ---- */
 function toggleTheme() {
@@ -20,25 +21,49 @@ function toggleTheme() {
   root.setAttribute('data-theme', current === 'light' ? 'dark' : 'light');
 }
 
-/* ---- TABLA DE POSICIONES (MODAL) ---- */
+/* ---- GENERADOR DE PODIO Y TABLA ---- */
+function generatePodiumHTML(sortedPlayers) {
+  if (sortedPlayers.length === 0) return '<p class="dimmed" style="text-align:center;font-size:13px;">Agregá jugadores para ver los puntajes.</p>';
+
+  let html = '<div class="podium-container">';
+  // Segundo puesto (Izquierda)
+  if(sortedPlayers[1]) {
+      html += `<div class="podium-place podium-2"><div class="podium-name">${sortedPlayers[1].name}</div><div class="podium-score">${sortedPlayers[1].score}</div></div>`;
+  }
+  // Primer puesto (Centro)
+  if(sortedPlayers[0]) {
+      html += `<div class="podium-place podium-1"><div class="podium-name">${sortedPlayers[0].name}</div><div class="podium-score">${sortedPlayers[0].score}</div></div>`;
+  }
+  // Tercer puesto (Derecha)
+  if(sortedPlayers[2]) {
+      html += `<div class="podium-place podium-3"><div class="podium-name">${sortedPlayers[2].name}</div><div class="podium-score">${sortedPlayers[2].score}</div></div>`;
+  }
+  html += '</div>';
+
+  // Lista normal del 4to en adelante
+  for(let i = 3; i < sortedPlayers.length; i++) {
+      let p = sortedPlayers[i];
+      html += `<div class="score-row">
+          <span><span style="color:var(--text-dimmed);margin-right:8px;">${i+1}.</span> ${p.name}</span>
+          <span style="color:${p.score > 0 ? 'var(--success)' : p.score < 0 ? 'var(--danger)' : 'var(--text-dimmed)'}">${p.score}</span>
+      </div>`;
+  }
+  return html;
+}
+
+/* ---- TABLA DE POSICIONES (MODALES) ---- */
 function openScoreModal() {
   const list = document.getElementById('modal-scoreboard-list');
-  list.innerHTML = '';
-  if (STATE.players.length === 0) {
-    list.innerHTML = '<p class="dimmed" style="text-align:center;font-size:13px;">Agregá jugadores para ver los puntajes.</p>';
-  } else {
-    const sorted = [...STATE.players].sort((a,b)=>b.score-a.score);
-    sorted.forEach((p, i) => {
-      list.innerHTML += `<div class="score-row">
-        <span><span style="color:var(--text-dimmed);margin-right:8px;">${i+1}.</span> ${p.name}</span>
-        <span style="color:${p.score > 0 ? 'var(--success)' : p.score < 0 ? 'var(--danger)' : 'var(--text-dimmed)'}">${p.score}</span>
-      </div>`;
-    });
-  }
+  const sorted = [...STATE.players].sort((a,b)=>b.score-a.score);
+  list.innerHTML = generatePodiumHTML(sorted);
   document.getElementById('score-modal').style.display = 'flex';
 }
 function closeScoreModal() {
   document.getElementById('score-modal').style.display = 'none';
+}
+
+function closeWarningModal() {
+  document.getElementById('warning-modal').style.display = 'none';
 }
 
 function showScreen(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));const el=document.getElementById(id);el.classList.add('active');el.classList.remove('fade-in');void el.offsetWidth;el.classList.add('fade-in');}
@@ -53,16 +78,32 @@ function renderPlayerInputs(vals){
     const badge=document.createElement('div');
     badge.style.cssText='width:28px;height:28px;border-radius:50%;background:var(--primary);color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0;';
     badge.textContent=i+1;
+    
     const inp=document.createElement('input');
     inp.value=v; inp.placeholder='Jugador '+(i+1); inp.maxLength=14;
+    
     const removeBtn=document.createElement('button');
     removeBtn.style.cssText='width:30px;height:30px;border:1px solid var(--danger);background:transparent;border-radius:8px;cursor:pointer;color:var(--danger);font-size:16px;flex-shrink:0;display:flex;align-items:center;justify-content:center;';
     removeBtn.innerHTML='&times;';
-    removeBtn.onclick=()=>{const cur=getInputValues();cur.splice(i,1);if(cur.length<3)cur.push('');renderPlayerInputs(cur);};
-    if(vals.length<=3)removeBtn.disabled=true;
+    
+    // Nueva alerta de mínimo 3 jugadores
+    removeBtn.onclick=()=>{
+      const cur=getInputValues();
+      if(cur.length<=3){
+          const err = document.getElementById('setup-error');
+          err.textContent = 'El mínimo de jugadores es de 3';
+          err.style.display = 'block';
+          setTimeout(() => err.style.display = 'none', 3000); // Oculta el mensaje a los 3 seg.
+          return;
+      }
+      cur.splice(i,1);
+      renderPlayerInputs(cur);
+    };
+    
     row.appendChild(badge);row.appendChild(inp);row.appendChild(removeBtn);
     c.appendChild(row);
   });
+  
   if(vals.length<10){
     const addBtn=document.createElement('button');
     addBtn.style.cssText='width:100%;padding:10px;background:transparent;border:1px dashed var(--secondary);border-radius:10px;color:var(--secondary);cursor:pointer;font-family:Poppins,sans-serif;font-weight:600;font-size:13px;margin-top:5px;';
@@ -153,7 +194,6 @@ function buildSecretGrid(actors,allSeen){
 
     if(isRev){
       btn.innerHTML='<div class="zoom-in" style="text-align:center"><div style="font-size:42px;font-weight:900;color:var(--secondary);line-height:1;">'+STATE.assignments[name]+'</div><div style="font-size:10px;color:var(--text-dimmed);margin-top:4px;">toca para ocultar</div></div>';
-      // AL OCULTAR: Avanza automáticamente al siguiente jugador (Corrección 7)
       btn.onclick=()=>{
         STATE.revealed=false; 
         STATE.seenCount++; 
@@ -187,25 +227,22 @@ function renderSortScreen(){
   STATE.sortOrder.forEach((name,i)=>{
     const row=document.createElement('div');
     row.className='order-row fade-in';
-    row.dataset.name = name; // Guardamos el nombre para recuperar el orden
+    row.dataset.name = name; 
     row.style.animationDelay=(i*0.05)+'s';
     
     const badge=document.createElement('div');badge.className='order-badge';badge.textContent=i+1;
     const nameDiv=document.createElement('div');nameDiv.className='order-name';nameDiv.textContent=name;
-    const handle=document.createElement('div');handle.className='drag-handle';handle.innerHTML='&#8801;'; // Icono hamburguesa
+    const handle=document.createElement('div');handle.className='drag-handle';handle.innerHTML='&#8801;';
     
     row.appendChild(badge);row.appendChild(nameDiv);row.appendChild(handle);
     list.appendChild(row);
   });
 
-  // Inicializar SortableJS para arrastrar y soltar (Corrección 6)
   new Sortable(list, {
     animation: 150,
     ghostClass: 'sortable-ghost',
     onEnd: function () {
-        // Actualizar el estado con el nuevo orden del DOM
         STATE.sortOrder = [...list.children].map(row => row.dataset.name);
-        // Re-renderizamos para actualizar los numeritos (1, 2, 3...)
         renderSortScreen();
     }
   });
@@ -252,13 +289,28 @@ function renderResults(delta,correctOrder){
 }
 
 function nextRound(){
+  STATE.round++;
+  // Muestra el cartel en la ronda 4
+  if (STATE.round === 4) {
+      document.getElementById('warning-modal').style.display = 'flex';
+  }
+  
   STATE.captainIdx=(STATE.captainIdx+1)%STATE.players.length;
   pickPromptAndAssign();
   renderCaptainScreen();
   showScreen('s-captain');
 }
+
+/* ---- FIN DEL JUEGO ---- */
 function endGame(){
-  STATE={players:[],captainIdx:0,assignments:{},sortOrder:[],captainOrder:[],usedPrompts:[],promptIdx:0,secretIdx:0,seenCount:0,revealed:false};
+  const list = document.getElementById('final-scoreboard-list');
+  const sorted = [...STATE.players].sort((a,b)=>b.score-a.score);
+  list.innerHTML = generatePodiumHTML(sorted);
+  showScreen('s-final');
+}
+
+function resetGame(){
+  STATE={players:[],captainIdx:0,assignments:{},sortOrder:[],captainOrder:[],usedPrompts:[],promptIdx:0,secretIdx:0,seenCount:0,revealed:false,round:1};
   renderPlayerInputs(['','','']);
   showScreen('s-setup');
 }
