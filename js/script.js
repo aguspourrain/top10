@@ -11,7 +11,6 @@ const PROMPTS=[
 
 function shuffle(a){const b=[...a];for(let i=b.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[b[i],b[j]]=[b[j],b[i]];}return b;}
 
-// Agregado STATE.round para trackear rondas jugadas
 let STATE={players:[],captainIdx:0,assignments:{},sortOrder:[],captainOrder:[],usedPrompts:[],promptIdx:0,secretIdx:0,seenCount:0,revealed:false, round:1};
 
 /* ---- TEMA CLARO/OSCURO ---- */
@@ -21,37 +20,14 @@ function toggleTheme() {
   root.setAttribute('data-theme', current === 'light' ? 'dark' : 'light');
 }
 
-/* ---- GENERADOR DE PODIO Y TABLA ---- */
-function generatePodiumHTML(sortedPlayers) {
-  if (sortedPlayers.length === 0) return '<p class="dimmed" style="text-align:center;font-size:13px;">Agregá jugadores para ver los puntajes.</p>';
-
-  let html = '<div class="podium-container">';
-  // Segundo puesto (Izquierda)
-  if(sortedPlayers[1]) {
-      html += `<div class="podium-place podium-2"><div class="podium-name">${sortedPlayers[1].name}</div><div class="podium-score">${sortedPlayers[1].score}</div></div>`;
-  }
-  // Primer puesto (Centro)
-  if(sortedPlayers[0]) {
-      html += `<div class="podium-place podium-1"><div class="podium-name">${sortedPlayers[0].name}</div><div class="podium-score">${sortedPlayers[0].score}</div></div>`;
-  }
-  // Tercer puesto (Derecha)
-  if(sortedPlayers[2]) {
-      html += `<div class="podium-place podium-3"><div class="podium-name">${sortedPlayers[2].name}</div><div class="podium-score">${sortedPlayers[2].score}</div></div>`;
-  }
-  html += '</div>';
-
-  // Lista normal del 4to en adelante
-  for(let i = 3; i < sortedPlayers.length; i++) {
-      let p = sortedPlayers[i];
-      html += `<div class="score-row">
-          <span><span style="color:var(--text-dimmed);margin-right:8px;">${i+1}.</span> ${p.name}</span>
-          <span style="color:${p.score > 0 ? 'var(--success)' : p.score < 0 ? 'var(--danger)' : 'var(--text-dimmed)'}">${p.score}</span>
-      </div>`;
-  }
-  return html;
+/* ---- MODALES DE REGLAS, TABLA Y AVISO ---- */
+function openRulesModal() {
+  document.getElementById('rules-modal').style.display = 'flex';
+}
+function closeRulesModal() {
+  document.getElementById('rules-modal').style.display = 'none';
 }
 
-/* ---- TABLA DE POSICIONES (MODALES) ---- */
 function openScoreModal() {
   const list = document.getElementById('modal-scoreboard-list');
   const sorted = [...STATE.players].sort((a,b)=>b.score-a.score);
@@ -64,6 +40,32 @@ function closeScoreModal() {
 
 function closeWarningModal() {
   document.getElementById('warning-modal').style.display = 'none';
+}
+
+/* ---- GENERADOR DE PODIO Y TABLA ---- */
+function generatePodiumHTML(sortedPlayers) {
+  if (sortedPlayers.length === 0) return '<p class="dimmed" style="text-align:center;font-size:13px;">Agregá jugadores para ver los puntajes.</p>';
+
+  let html = '<div class="podium-container">';
+  if(sortedPlayers[1]) {
+      html += `<div class="podium-place podium-2"><div class="podium-name">${sortedPlayers[1].name}</div><div class="podium-score">${sortedPlayers[1].score}</div></div>`;
+  }
+  if(sortedPlayers[0]) {
+      html += `<div class="podium-place podium-1"><div class="podium-name">${sortedPlayers[0].name}</div><div class="podium-score">${sortedPlayers[0].score}</div></div>`;
+  }
+  if(sortedPlayers[2]) {
+      html += `<div class="podium-place podium-3"><div class="podium-name">${sortedPlayers[2].name}</div><div class="podium-score">${sortedPlayers[2].score}</div></div>`;
+  }
+  html += '</div>';
+
+  for(let i = 3; i < sortedPlayers.length; i++) {
+      let p = sortedPlayers[i];
+      html += `<div class="score-row">
+          <span><span style="color:var(--text-dimmed);margin-right:8px;">${i+1}.</span> ${p.name}</span>
+          <span style="color:${p.score > 0 ? 'var(--success)' : p.score < 0 ? 'var(--danger)' : 'var(--text-dimmed)'}">${p.score}</span>
+      </div>`;
+  }
+  return html;
 }
 
 function showScreen(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));const el=document.getElementById(id);el.classList.add('active');el.classList.remove('fade-in');void el.offsetWidth;el.classList.add('fade-in');}
@@ -86,14 +88,13 @@ function renderPlayerInputs(vals){
     removeBtn.style.cssText='width:30px;height:30px;border:1px solid var(--danger);background:transparent;border-radius:8px;cursor:pointer;color:var(--danger);font-size:16px;flex-shrink:0;display:flex;align-items:center;justify-content:center;';
     removeBtn.innerHTML='&times;';
     
-    // Nueva alerta de mínimo 3 jugadores
     removeBtn.onclick=()=>{
       const cur=getInputValues();
       if(cur.length<=3){
           const err = document.getElementById('setup-error');
-          err.textContent = 'El mínimo de jugadores es de 3';
+          err.textContent = 'El mínimo de jugadores es de 3 👀';
           err.style.display = 'block';
-          setTimeout(() => err.style.display = 'none', 3000); // Oculta el mensaje a los 3 seg.
+          setTimeout(() => err.style.display = 'none', 3000);
           return;
       }
       cur.splice(i,1);
@@ -120,6 +121,10 @@ function startGame(){
   if(vals.length<3){err.textContent='Necesitás al menos 3 jugadores';err.style.display='block';return;}
   if(new Set(vals.map(v=>v.toLowerCase())).size!==vals.length){err.textContent='Los nombres deben ser únicos';err.style.display='block';return;}
   err.style.display='none';
+  
+  // Mostrar el botón FIN global al empezar la partida
+  document.getElementById('btn-end-global').style.display = 'block';
+
   STATE.players=vals.map(n=>({name:n,score:0}));
   STATE.usedPrompts=[];
   STATE.captainIdx=Math.floor(Math.random()*STATE.players.length);
@@ -147,6 +152,13 @@ function renderCaptainScreen(){
   document.getElementById('prompt-text').textContent=p.text;
   document.getElementById('prompt-scale').textContent='Escala: '+p.scale;
 }
+
+// Nueva función para saltar consigna
+function skipPrompt() {
+  pickPromptAndAssign();
+  renderCaptainScreen();
+}
+
 function goToSecret(){
   STATE.secretIdx=0;STATE.seenCount=0;STATE.revealed=false;
   renderSecretScreen();
@@ -290,8 +302,9 @@ function renderResults(delta,correctOrder){
 
 function nextRound(){
   STATE.round++;
-  // Muestra el cartel en la ronda 4
-  if (STATE.round === 4) {
+  
+  // Aparece el modal cada vez que se juega un múltiplo exacto de 4 rondas
+  if (STATE.round % 4 === 0 && STATE.round > 0) {
       document.getElementById('warning-modal').style.display = 'flex';
   }
   
@@ -303,6 +316,9 @@ function nextRound(){
 
 /* ---- FIN DEL JUEGO ---- */
 function endGame(){
+  // Ocultar el botón global al llegar al final
+  document.getElementById('btn-end-global').style.display = 'none';
+  
   const list = document.getElementById('final-scoreboard-list');
   const sorted = [...STATE.players].sort((a,b)=>b.score-a.score);
   list.innerHTML = generatePodiumHTML(sorted);
@@ -310,6 +326,7 @@ function endGame(){
 }
 
 function resetGame(){
+  document.getElementById('btn-end-global').style.display = 'none';
   STATE={players:[],captainIdx:0,assignments:{},sortOrder:[],captainOrder:[],usedPrompts:[],promptIdx:0,secretIdx:0,seenCount:0,revealed:false,round:1};
   renderPlayerInputs(['','','']);
   showScreen('s-setup');
@@ -317,3 +334,8 @@ function resetGame(){
 
 // Init
 renderPlayerInputs(['','','']);
+
+// Mostrar Reglas automáticamente la primera vez que se carga la página
+window.onload = () => {
+    openRulesModal();
+};

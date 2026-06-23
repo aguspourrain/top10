@@ -108,7 +108,7 @@ h1.logo-small { font-size: 28px; font-weight: 900; color: var(--secondary); text
 .btn:active { transform: scale(0.96); }
 .btn-primary { background: var(--primary); color: var(--btn-text); }
 .btn-secondary { background: var(--secondary); color: var(--btn-text); }
-.btn-ghost { background: var(--input-bg); color: var(--text-main); border: 1px solid var(--card-border); }
+.btn-ghost { background: transparent; color: var(--text-dimmed); border: 1px dashed var(--card-border); }
 
 input {
   width: 100%; background: var(--input-bg); border: 1px solid var(--card-border);
