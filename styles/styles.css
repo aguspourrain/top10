@@ -6,9 +6,9 @@
   --text-dimmed: #9a9ab0;
   --card-bg: rgba(45, 45, 60, 0.95);
   --card-border: rgba(138, 94, 230, 0.3);
-  --primary: #8a5ee6; /* Violeta suave */
+  --primary: #8a5ee6;
   --primary-hover: #754dc9;
-  --secondary: #42d4d4; /* Celeste suave */
+  --secondary: #42d4d4;
   --secondary-hover: #35b5b5;
   --btn-text: #ffffff;
   --input-bg: rgba(255, 255, 255, 0.05);
@@ -37,13 +37,14 @@
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
+
 body {
   background: var(--bg-color);
   font-family: 'Poppins', sans-serif;
   color: var(--text-main);
   min-height: 100vh;
   display: flex;
-  align-items: center;
+  align-items: flex-start; /* Permite scroll natural en dispositivos pequeños */
   justify-content: center;
   transition: background 0.3s, color 0.3s;
 }
@@ -56,8 +57,8 @@ body {
 
 #app {
   width: 100%;
-  max-width: 400px;
-  padding: 60px 16px 20px;
+  max-width: 420px; /* Un toque más amplio para mejor lectura */
+  padding: 70px 16px 30px;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
@@ -68,30 +69,55 @@ body {
 }
 
 /* TOP BAR */
-.top-bar { position: fixed; top: 10px; right: 10px; display: flex; gap: 8px; z-index: 100; }
+.top-bar { position: fixed; top: 10px; left: 50%; transform: translateX(-50%); width: 100%; max-width: 420px; padding: 0 16px; display: flex; gap: 8px; justify-content: flex-end; z-index: 100; }
 .btn-top {
   background: var(--card-bg); border: 1px solid var(--card-border); color: var(--primary);
   padding: 6px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; cursor: pointer;
   box-shadow: 0 2px 10px rgba(0,0,0,0.1);
 }
+.btn-end { color: var(--danger); border-color: var(--danger); }
 
-/* Tipografía y Textos */
-h1.logo { font-size: clamp(36px, 10vw, 48px); font-weight: 900; color: var(--secondary); text-align: center; letter-spacing: 0.05em; margin-bottom: 5px; }
-h1.logo-small { font-size: 28px; font-weight: 900; color: var(--secondary); text-align: center; letter-spacing: 0.05em; margin-bottom: 15px; }
+/* Tipografía y Textos Clases Globales */
+h1.logo { font-size: clamp(36px, 10vw, 46px); font-weight: 900; color: var(--secondary); text-align: center; letter-spacing: 0.05em; margin-bottom: 5px; }
+h1.logo-small { font-size: 26px; font-weight: 900; color: var(--secondary); text-align: center; letter-spacing: 0.05em; margin-bottom: 15px; }
 .dimmed { color: var(--text-dimmed); }
 .primary-text { color: var(--primary); }
 .secondary-text { color: var(--secondary); }
 .success-text { color: var(--success); }
 .error-text { color: var(--danger); text-align: center; font-size: 13px; margin-bottom: 10px; display: none; }
 .highlight-text { color: var(--highlight); font-weight: 700; }
-.highlight-title { font-size: clamp(20px, 6vw, 28px); font-weight: 800; color: var(--highlight); }
+.highlight-title { font-size: clamp(20px, 6vw, 26px); font-weight: 800; color: var(--highlight); }
 .score-huge { font-size: 48px; font-weight: 900; line-height: 1; margin: 5px 0; }
 .tag { font-size: 11px; letter-spacing: 0.1em; font-weight: 700; text-transform: uppercase; }
 
-/* Contenedores */
+/* Helpers de formato */
+.text-center { text-align: center; }
+.fw-700 { font-weight: 700; }
+.mb-4 { margin-bottom: 4px; }
+.mb-6 { margin-bottom: 6px; }
+.mb-10 { margin-bottom: 10px; }
+.mb-12 { margin-bottom: 12px; }
+.mb-14 { margin-bottom: 14px; }
+.mb-16 { margin-bottom: 16px; }
+.mb-18 { margin-bottom: 18px; }
+.mb-20 { margin-bottom: 20px; }
+.mt-4 { margin-top: 4px; }
+.mt-10 { margin-top: 10px; }
+.mt-15 { margin-top: 15px; }
+.mt-20 { margin-top: 20px; }
+.fs-12 { font-size: 12px; }
+.fs-13 { font-size: 13px; }
+.fs-14 { font-size: 14px; }
+.padding-12 { padding: 12px; }
+
+/* Componentes de Pantalla Específicos */
+.prompt-text-style { font-size: 16px; line-height: 1.5; font-weight: 600; margin-bottom: 14px; }
+.secret-headline { font-size: 18px; font-weight: 800; letter-spacing: 0.05em; margin-bottom: 6px; }
+.section-title { text-align: center; font-size: 16px; font-weight: 700; margin-bottom: 4px; }
+
 .card {
   background: var(--card-bg); border: 1px solid var(--card-border);
-  border-radius: 16px; padding: 16px; margin-bottom: 15px;
+  border-radius: 16px; padding: 16px;
   box-shadow: 0 4px 15px rgba(0,0,0,0.05);
 }
 .scale-box {
@@ -99,6 +125,25 @@ h1.logo-small { font-size: 28px; font-weight: 900; color: var(--secondary); text
   font-size: 12px; font-style: normal; color: var(--text-dimmed); font-weight: 600;
 }
 
+.custom-select {
+  width: 100%; 
+  background: var(--input-bg); 
+  border: 1px solid var(--card-border);
+  border-radius: 10px; 
+  padding: 12px; 
+  color: var(--text-main);
+  font-family: 'Poppins', sans-serif; 
+  font-size: 14px; 
+  outline: none; 
+  cursor: pointer;
+}
+
+.custom-select option {
+  background-color: var(--app-bg);
+  color: var(--text-main);          
+  font-family: 'Poppins', sans-serif;
+  padding: 10px;
+}
 /* Botones y Entradas */
 .btn {
   width: 100%; padding: 14px 20px; border: none; border-radius: 12px;
@@ -107,7 +152,9 @@ h1.logo-small { font-size: 28px; font-weight: 900; color: var(--secondary); text
 }
 .btn:active { transform: scale(0.96); }
 .btn-primary { background: var(--primary); color: var(--btn-text); }
+.btn-primary:hover { background: var(--primary-hover); }
 .btn-secondary { background: var(--secondary); color: var(--btn-text); }
+.btn-secondary:hover { background: var(--secondary-hover); }
 .btn-ghost { background: transparent; color: var(--text-dimmed); border: 1px dashed var(--card-border); }
 
 input {
@@ -118,15 +165,29 @@ input {
 input:focus { border-color: var(--primary); }
 input::placeholder { color: var(--text-dimmed); }
 
+/* Clases generadas dinámicamente en JS para Setup de Jugadores */
+.js-player-row { display: flex; gap: 8px; margin-bottom: 10px; align-items: center; }
+.js-player-badge { width: 28px; height: 28px; border-radius: 50%; background: var(--primary); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; flex-shrink: 0; }
+.js-btn-remove { width: 30px; height: 30px; border: 1px solid var(--danger); background: transparent; border-radius: 8px; cursor: pointer; color: var(--danger); font-size: 16px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; transition: background 0.2s; }
+.js-btn-remove:hover { background: rgba(255, 92, 119, 0.1); }
+.js-btn-add { width: 100%; padding: 10px; background: transparent; border: 1px dashed var(--secondary); border-radius: 10px; color: var(--secondary); cursor: pointer; font-family: Poppins,sans-serif; font-weight: 600; font-size: 13px; margin-top: 5px; }
+
 /* Grilla Secreta */
+.secret-grid-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 18px; }
 .num-btn {
   border: 2px solid; border-radius: 12px; padding: 15px 10px; min-height: 75px;
   display: flex; flex-direction: column; align-items: center; justify-content: center;
   cursor: pointer; transition: all 0.2s; font-family: 'Poppins', sans-serif;
   color: var(--text-main); font-weight: 700; font-size: 14px; background: var(--card-bg);
 }
-.progress-bar { height: 6px; background: var(--input-bg); border-radius: 3px; overflow: hidden; }
-.progress-fill { height: 100%; background: var(--secondary); border-radius: 3px; transition: width 0.3s; }
+.js-zoom-inner { text-align: center; }
+.js-zoom-num { font-size: 42px; font-weight: 900; color: var(--secondary); line-height: 1; }
+.js-zoom-sub { font-size: 10px; color: var(--text-dimmed); margin-top: 4px; }
+.js-txt-seen { font-size: 10px; color: var(--success); margin-top: 4px; }
+
+.progress-container { display: flex; align-items: center; gap: 10px; }
+.progress-bar { flex: 1; height: 6px; background: var(--input-bg); border-radius: 3px; overflow: hidden; }
+.progress-fill { height: 100%; background: var(--secondary); border-radius: 3px; transition: width 0.3s; width: 0%; }
 
 /* Orden y Resultados */
 .sort-axis-label { display: flex; align-items: center; gap: 10px; font-size: 11px; font-weight: 700; color: var(--text-dimmed); margin: 6px 0; }
@@ -141,10 +202,19 @@ input::placeholder { color: var(--text-dimmed); }
 .result-row { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
 .result-pos { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; }
 .result-card { flex: 1; display: flex; align-items: center; justify-content: space-between; border-radius: 10px; padding: 10px 14px; }
+.js-res-name { font-weight: 600; font-size: 14px; }
+.js-res-val { font-weight: 800; font-size: 18px; color: var(--secondary); }
+.js-res-icon { font-size: 12px; font-weight: bold; }
 
 /* Modales y Podio */
 .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); backdrop-filter: blur(4px); z-index: 1000; display: flex; align-items: center; justify-content: center; padding: 20px; }
 .modal-content { background: var(--app-bg); border-radius: 16px; padding: 20px; width: 100%; max-width: 350px; border: 1px solid var(--card-border); }
+.modal-title { margin-bottom: 15px; color: var(--primary); }
+.compact-title { margin-bottom: 5px; }
+.modal-body { font-size: 13px; color: var(--text-dimmed); line-height: 1.6; margin-bottom: 20px; }
+.scrollable-modal { max-height: 80vh; overflow-y: auto; }
+.warning-icon { font-size: 40px; margin-bottom: 10px; }
+.warning-text { font-size: 14px; margin-bottom: 20px; color: var(--text-dimmed); }
 
 /* Estilos del Podio */
 .podium-container { display: flex; align-items: flex-end; justify-content: center; gap: 6px; margin: 35px 0 20px; }
@@ -157,6 +227,17 @@ input::placeholder { color: var(--text-dimmed); }
 
 .score-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--input-bg); font-weight: 600; font-size: 14px; }
 .score-row:last-child { border-bottom: none; }
+.js-score-rank { color: var(--text-dimmed); margin-right: 8px; }
 
+/* Control de vistas */
 .screen { width: 100%; display: none; }
 .screen.active { display: block; }
+.hidden { display: none !important; }
+
+/* Ajustes finos de Responsividad Extrema (pantallas muy pequeñas) */
+@media (max-width: 360px) {
+  #app { padding: 65px 10px 15px; }
+  .secret-grid-layout { gap: 6px; }
+  .num-btn { min-height: 65px; padding: 10px 5px; font-size: 13px; }
+  .js-zoom-num { font-size: 34px; }
+}

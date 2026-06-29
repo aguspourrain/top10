@@ -1,148 +1,159 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
-<title>Top 10</title>
-<link rel="stylesheet" href="styles/styles.css">
-<script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
-<script src="js/script.js" defer></script>
-<link rel="preconnect" href="https://fonts.googleapis.com"/>
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800;900&display=swap" rel="stylesheet"/>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+  <title>Top 10</title>
+  <link rel="stylesheet" href="styles/styles.css">
+  <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
+  <script src="js/script.js" defer></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800;900&display=swap" rel="stylesheet"/>
 </head>
 <body>
 
-<div class="top-bar">
-  <button class="btn-top" onclick="toggleTheme()">Tema</button>
-  <button class="btn-top" onclick="openRulesModal()">Reglas</button>
-  <button class="btn-top" onclick="openScoreModal()">Tabla</button>
-  <button class="btn-top" id="btn-end-global" onclick="endGame()" style="display:none; color: var(--danger); border-color: var(--danger);">Fin</button>
-</div>
+  <div class="top-bar">
+    <button class="btn-top" onclick="toggleTheme()">Tema</button>
+    <button class="btn-top" onclick="openRulesModal()">Reglas</button>
+    <button class="btn-top" onclick="openScoreModal()">Tabla</button>
+    <button class="btn-top btn-end hidden" id="btn-end-global" onclick="endGame()">Fin</button>
+  </div>
 
-<div id="rules-modal" class="modal-overlay" style="display:none;">
-  <div class="modal-content" style="max-height: 80vh; overflow-y: auto;">
-    <h2 style="margin-bottom: 15px; color: var(--primary); text-align: center;">Cómo Jugar</h2>
-    <div style="font-size: 13px; color: var(--text-dimmed); line-height: 1.6; margin-bottom: 20px;">
-      <p><strong>1.</strong> En cada ronda habrá un <strong>Capitán</strong> y una consigna con una escala del 1 al 10.</p><br>
-      <p><strong>2.</strong> El Capitán lee la consigna en voz alta y pasa el celular.</p><br>
-      <p><strong>3.</strong> Los demás jugadores tocan su nombre para ver qué <strong>número secreto</strong> del 1 al 10 les tocó.</p><br>
-      <p><strong>4.</strong> Cada jugador debe describir su reacción a la consigna basándose en la intensidad de su número (1 es el mínimo, 10 el máximo).</p><br>
-      <p><strong>5.</strong> Al terminar de actuar, el Capitán debe ordenar a los jugadores de <strong>menor a mayor</strong> intensidad arrastrando sus nombres.</p><br>
-      <p><strong>Puntuación:</strong> El Capitán suma +1 punto por cada acierto y -1 por cada error.</p>
+  <div id="rules-modal" class="modal-overlay hidden">
+    <div class="modal-content scrollable-modal">
+      <h2 class="modal-title">Cómo Jugar</h2>
+      <div class="modal-body">
+        <p><strong>1.</strong> En cada ronda habrá un <strong>Capitán</strong> y una consigna con una escala del 1 al 10.</p><br>
+        <p><strong>2.</strong> El Capitán lee la consigna en voz alta y pasa el celular.</p><br>
+        <p><strong>3.</strong> Los demás jugadores tocan su nombre para ver qué <strong>número secreto</strong> del 1 al 10 les tocó.</p><br>
+        <p><strong>4.</strong> Cada jugador debe describir su reacción a la consigna basándose en la intensidad de su número (1 es el mínimo, 10 el máximo).</p><br>
+        <p><strong>5.</strong> Al terminar de actuar, el Capitán debe ordenar a los jugadores de <strong>menor a mayor</strong> intensidad arrastrando sus nombres.</p><br>
+        <p><strong>Puntuación:</strong> El Capitán suma +1 punto por cada acierto y -1 por cada error.</p>
+      </div>
+      <button class="btn btn-primary" onclick="closeRulesModal()">¡Entendido!</button>
     </div>
-    <button class="btn btn-primary" onclick="closeRulesModal()">¡Entendido!</button>
-  </div>
-</div>
-
-<div id="score-modal" class="modal-overlay" style="display:none;">
-  <div class="modal-content">
-    <h2 style="margin-bottom: 5px; color: var(--primary); text-align: center;">Posiciones</h2>
-    <div id="modal-scoreboard-list"></div>
-    <button class="btn btn-primary" style="margin-top: 15px;" onclick="closeScoreModal()">Cerrar</button>
-  </div>
-</div>
-
-<div id="warning-modal" class="modal-overlay" style="display:none;">
-  <div class="modal-content" style="text-align:center;">
-    <div style="font-size:40px; margin-bottom:10px;">⚠️</div>
-    <h2 style="margin-bottom: 10px; color: var(--highlight);">¡Atención!</h2>
-    <p style="font-size:14px; margin-bottom:20px; color:var(--text-dimmed);">Ya van varias rondas jugadas. Recuerden que el uso excesivo del celular en reuniones corta la charla. ¡Mírense a las caras mientras actúan!</p>
-    <button class="btn btn-secondary" onclick="closeWarningModal()">Entendido</button>
-  </div>
-</div>
-
-<div id="app">
-
-<div id="s-setup" class="screen active fade-in">
-  <h1 class="logo">TOP 10</h1>
-  <p class="dimmed" style="text-align:center;font-size:14px;margin-bottom:20px;">¿Quiénes juegan hoy?</p>
-  <div class="card" style="margin-bottom:14px;" id="players-container"></div>
-  <p id="setup-error" class="error-text"></p>
-  <button class="btn btn-secondary" onclick="startGame()">COMENZAR JUEGO</button>
-</div>
-
-<div id="s-captain" class="screen">
-  <h1 class="logo-small">TOP 10</h1>
-  <div class="card" style="margin-bottom:16px;text-align:center;">
-    <div class="tag dimmed" style="margin-bottom:6px;">El capitán de esta ronda</div>
-    <div id="captain-name" class="highlight-title"></div>
-    <div class="dimmed" style="font-size:12px; margin-top:4px;">(Capitán)</div>
-  </div>
-  <div class="card" style="margin-bottom:16px;">
-    <div class="tag primary-text" style="margin-bottom:12px;">Consigna de la ronda</div>
-    <p id="prompt-text" style="font-size:15px;line-height:1.5;font-weight:600;margin-bottom:14px;"></p>
-    <div id="prompt-scale" class="scale-box"></div>
-  </div>
-  <p class="dimmed" style="text-align:center;font-size:13px;margin-bottom:14px;">Leé la consigna en voz alta y pasá el celular.</p>
-  <button class="btn btn-primary" style="margin-bottom:10px;" onclick="goToSecret()">REPARTIR NÚMEROS</button>
-  <button class="btn btn-ghost" onclick="skipPrompt()">OTRA CONSIGNA</button>
-</div>
-
-<div id="s-secret" class="screen">
-  <h1 class="logo-small">TOP 10</h1>
-  <div style="text-align:center;margin-bottom:18px;">
-    <div class="primary-text" style="font-size:18px;font-weight:800;letter-spacing:0.05em;margin-bottom:6px;">PASAR CELULAR</div>
-    <div id="secret-hint" class="dimmed" style="font-size:14px;"></div>
-  </div>
-  <div id="secret-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:18px;"></div>
-  <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;">
-    <div class="progress-bar" style="flex:1;"><div class="progress-fill" id="secret-progress" style="width:0%"></div></div>
-    <span class="dimmed" id="secret-counter" style="font-size:12px;"></span>
-  </div>
-  
-  <div id="secret-done" style="display:none;">
-    <p class="success-text" style="text-align:center;font-weight:700;margin-bottom:14px;">¡Todos vieron su número!</p>
-    <button class="btn btn-secondary" onclick="goToSort()">VOLVER AL CAPITÁN</button>
-  </div>
-</div>
-
-<div id="s-sort" class="screen">
-  <h1 class="logo-small">TOP 10</h1>
-  <div class="card" style="margin-bottom:16px;text-align:center;padding:12px;">
-    <span class="dimmed" style="font-size:13px;">Capitán: </span><span id="sort-captain" class="highlight-text"></span>
-  </div>
-  <h2 style="text-align:center;font-size:16px;font-weight:700;margin-bottom:4px;">Ordená a los jugadores</h2>
-  <p class="dimmed" style="text-align:center;font-size:12px;margin-bottom:16px;">Arrastrá los nombres para ordenarlos</p>
-
-  <div class="sort-axis-label">
-    <div class="sort-axis-line"></div>
-    <span class="sort-axis-text">MENOR intensidad</span>
-    <div class="sort-axis-line"></div>
   </div>
 
-  <div id="sort-list"></div>
-
-  <div class="sort-axis-label" style="margin-top: 10px;">
-    <div class="sort-axis-line"></div>
-    <span class="sort-axis-text">MAYOR intensidad</span>
-    <div class="sort-axis-line"></div>
+  <div id="score-modal" class="modal-overlay hidden">
+    <div class="modal-content">
+      <h2 class="modal-title text-center compact-title">Posiciones</h2>
+      <div id="modal-scoreboard-list"></div>
+      <button class="btn btn-primary mt-15" onclick="closeScoreModal()">Cerrar</button>
+    </div>
   </div>
 
-  <button class="btn btn-secondary" onclick="revealResult()" style="margin-top:20px;">REVELAR RESULTADO</button>
-</div>
-
-<div id="s-results" class="screen">
-  <h1 class="logo-small">TOP 10</h1>
-  <div class="card" style="margin-bottom:16px;text-align:center;">
-    <div class="dimmed" style="font-size:12px;margin-bottom:4px;">El capitán <strong id="res-captain" class="highlight-text"></strong> suma:</div>
-    <div id="res-delta" class="score-huge"></div>
-    <div class="dimmed" style="font-size:12px;">puntos</div>
+  <div id="warning-modal" class="modal-overlay hidden">
+    <div class="modal-content text-center">
+      <div class="warning-icon">⚠️</div>
+      <h2 class="modal-title text-center compact-title">¡Atención!</h2>
+      <p class="warning-text">Ya van varias rondas jugadas. Recuerden que el uso excesivo del celular en reuniones corta la charla. ¡Mírense a las caras mientras actúan!</p>
+      <button class="btn btn-secondary" onclick="closeWarningModal()">Entendido</button>
+    </div>
   </div>
-  <div class="tag primary-text" style="margin-bottom:10px;">Orden real</div>
-  <div id="res-order" style="margin-bottom:20px;"></div>
-  
-  <button class="btn btn-primary" onclick="nextRound()">SIGUIENTE RONDA</button>
-</div>
 
-<div id="s-final" class="screen">
-  <h1 class="logo-small">FIN DEL JUEGO</h1>
-  <div class="card">
-    <h2 style="text-align:center; font-size:18px; color:var(--primary); margin-bottom:5px;">Posiciones Finales</h2>
-    <div id="final-scoreboard-list"></div>
+  <div id="app">
+
+    <div id="s-setup" class="screen active fade-in">
+      <h1 class="logo">TOP 10</h1>
+      <p class="dimmed text-center mb-20 fs-14">¿Quiénes juegan hoy?</p>
+      <div class="card mb-14" id="players-container"></div>
+      
+      <div class="card mb-14">
+        <div class="tag primary-text mb-6">Elige una Temática</div>
+        <select id="theme-selector" class="custom-select">
+          <option value="all">🌟 Todas las consignas</option>
+          <option value="party">🎉 Fiesta y Amigos</option>
+          <option value="geek">👾 Geek & Pop Culture</option>
+          <option value="hot">🌶️ Picantes / Incómodas</option>
+        </select>
+      </div>
+
+      <p id="setup-error" class="error-text"></p>
+      <button class="btn btn-secondary" onclick="startGame()">COMENZAR JUEGO</button>
+    </div>
+
+    <div id="s-captain" class="screen">
+      <h1 class="logo-small">TOP 10</h1>
+      <div class="card text-center mb-16">
+        <div class="tag dimmed mb-6">El capitán de esta ronda</div>
+        <div id="captain-name" class="highlight-title"></div>
+        <div class="dimmed fs-12 mt-4">(Capitán)</div>
+      </div>
+      <div class="card mb-16">
+        <div class="tag primary-text mb-12">Consigna de la ronda</div>
+        <p id="prompt-text" class="prompt-text-style"></p>
+        <div id="prompt-scale" class="scale-box"></div>
+      </div>
+      <p class="dimmed text-center fs-13 mb-14">Leé la consigna en voz alta y pasá el celular.</p>
+      <button class="btn btn-primary mb-10" onclick="goToSecret()">REPARTIR NÚMEROS</button>
+      <button class="btn btn-ghost" onclick="skipPrompt()">OTRA CONSIGNA</button>
+    </div>
+
+    <div id="s-secret" class="screen">
+      <h1 class="logo-small">TOP 10</h1>
+      <div class="text-center mb-18">
+        <div class="primary-text secret-headline">PASAR CELULAR</div>
+        <div id="secret-hint" class="dimmed fs-14"></div>
+      </div>
+      <div id="secret-grid" class="secret-grid-layout"></div>
+      <div class="progress-container mb-16">
+        <div class="progress-bar"><div class="progress-fill" id="secret-progress"></div></div>
+        <span class="dimmed fs-12" id="secret-counter"></span>
+      </div>
+      
+      <div id="secret-done" class="hidden">
+        <p class="success-text text-center fw-700 mb-14">¡Todos vieron su número!</p>
+        <button class="btn btn-secondary" onclick="goToSort()">VOLVER AL CAPITÁN</button>
+      </div>
+    </div>
+
+    <div id="s-sort" class="screen">
+      <h1 class="logo-small">TOP 10</h1>
+      <div class="card text-center padding-12 mb-16">
+        <span class="dimmed fs-13">Capitán: </span><span id="sort-captain" class="highlight-text"></span>
+      </div>
+      <h2 class="section-title">Ordená a los jugadores</h2>
+      <p class="dimmed text-center fs-12 mb-16">Arrastrá los nombres para ordenarlos</p>
+
+      <div class="sort-axis-label">
+        <div class="sort-axis-line"></div>
+        <span class="sort-axis-text">MENOR intensidad</span>
+        <div class="sort-axis-line"></div>
+      </div>
+
+      <div id="sort-list"></div>
+
+      <div class="sort-axis-label mt-10">
+        <div class="sort-axis-line"></div>
+        <span class="sort-axis-text">MAYOR intensidad</span>
+        <div class="sort-axis-line"></div>
+      </div>
+
+      <button class="btn btn-secondary mt-20" onclick="revealResult()">REVELAR RESULTADO</button>
+    </div>
+
+    <div id="s-results" class="screen">
+      <h1 class="logo-small">TOP 10</h1>
+      <div class="card text-center mb-16">
+        <div class="dimmed fs-12 mb-4">El capitán <strong id="res-captain" class="highlight-text"></strong> suma:</div>
+        <div id="res-delta" class="score-huge"></div>
+        <div class="dimmed fs-12">puntos</div>
+      </div>
+      <div class="tag primary-text mb-10">Orden real</div>
+      <div id="res-order" class="mb-20"></div>
+      
+      <button class="btn btn-primary" onclick="nextRound()">SIGUIENTE RONDA</button>
+    </div>
+
+    <div id="s-final" class="screen">
+      <h1 class="logo-small">FIN DEL JUEGO</h1>
+      <div class="card">
+        <h2 class="modal-title text-center compact-title">Posiciones Finales</h2>
+        <div id="final-scoreboard-list"></div>
+      </div>
+      <button class="btn btn-secondary mt-20" onclick="resetGame()">VOLVER A EMPEZAR</button>
+    </div>
+
   </div>
-  <button class="btn btn-secondary" style="margin-top:20px;" onclick="resetGame()">VOLVER A EMPEZAR</button>
-</div>
-
-</div>
 </body>
 </html>
