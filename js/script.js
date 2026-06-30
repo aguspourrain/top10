@@ -149,17 +149,18 @@ function renderPlayerInputs(vals) {
     removeBtn.innerHTML = '&times;';
 
     removeBtn.onclick = () => {
-      const cur = getInputValues();
-      if (cur.length <= 3) {
-        const err = document.getElementById('setup-error');
-        err.textContent = 'El mínimo de jugadores es de 3 👀';
-        err.classList.add('active');
-        setTimeout(() => err.classList.remove('active'), 3000);
-        return;
-      }
-      cur.splice(i, 1);
-      renderPlayerInputs(cur);
-    };
+        const cur = getInputValues();
+        // Acá está la lógica del cartelito rojo
+        if (cur.length <= 3) {
+            const err = document.getElementById('setup-error');
+            err.textContent = 'El mínimo de jugadores es de 3 👀';
+            err.style.display = 'block';
+            setTimeout(() => err.style.display = 'none', 3000); // Se oculta a los 3 segundos
+            return;
+        }
+        cur.splice(i, 1);
+        renderPlayerInputs(cur);
+      };
 
     row.appendChild(badge); row.appendChild(inp); row.appendChild(removeBtn);
     c.appendChild(row);
